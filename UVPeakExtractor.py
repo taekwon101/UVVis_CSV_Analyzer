@@ -28,13 +28,14 @@ for file in os.listdir(specDir):
 df_spectra = pd.concat(df_list, axis=1)
 
 
-## Baseline Correct, Normalize, and Integrate Spectra ##
+## Baseline Correct, Normalize, Determine Max, and Integrate Spectra ##
 baselineIndex = WavelengthToIndex(200)
 # normalIndex = n/a
 wavelengthBound_low, wavelengthBound_high = 280, 300
 absBoundIndex_low, absBoundIndex_high = WavelengthToIndex(wavelengthBound_low), WavelengthToIndex(wavelengthBound_high)
 first = True
 area_dict = {}
+max_array = []
 for column in df_spectra:
     if first == False:
         ## Baseline Correction
@@ -45,6 +46,9 @@ for column in df_spectra:
         # normalVal = df[column][normalIndex]
         # df[column] += 1e-10
         # df[column] /= normalVal
+
+        ## Maximum Absorbance
+        max_array.append(df_spectra.loc[absBoundIndex_low:absBoundIndex_high, column].idxmax())
 
         ## Integration
         area = np.trapz(df_spectra[column][absBoundIndex_low:absBoundIndex_high])
@@ -60,5 +64,9 @@ title = 'UV/Vis Absorption Data for {}'.format(os.path.basename(specDir))
 df_spectra.plot(ax = axes[0], x = 'Wavelength (nm)', use_index = True, title = title)
 axes[0].axvline(wavelengthBound_low, ls = '--')
 axes[0].axvline(wavelengthBound_high, ls = '--')
+
+for max_index in max_array: 
+    print(max_index)
+    # axes[0].axvline(max_array[max_index])
 df_areas.plot.bar(ax = axes[1], rot = 0)
 plt.show()
