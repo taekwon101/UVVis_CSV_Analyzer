@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 
+colorText = open(r'colorlist_matplot.txt')
+colorList = colorText.read().split()
+
 def WavelengthToIndex(wavelength: float)-> int:
     '''returns index of input wavelength by subtracting input value from wavelength list and returning the index of the new minimum value'''
     difference_array = np.absolute(df_wavelengths - wavelength)
@@ -11,6 +14,7 @@ def WavelengthToIndex(wavelength: float)-> int:
 
 ## Create Dataframe of Raw Spectra from Given Directory ##
 specDir = r'Spectra\230112_operationMio\Operation MIO'
+
 df_list = []
 first = True
 
@@ -62,11 +66,9 @@ df_areas = pd.DataFrame(data = area_dict, index = ['area under {}nm to {}nm band
 fig, axes = plt.subplots(nrows = 2)
 title = 'UV/Vis Absorption Data for {}'.format(os.path.basename(specDir))
 df_spectra.plot(ax = axes[0], x = 'Wavelength (nm)', use_index = True, title = title)
-axes[0].axvline(wavelengthBound_low, ls = '--')
-axes[0].axvline(wavelengthBound_high, ls = '--')
-
-for max_index in max_array: 
-    print(max_index)
-    # axes[0].axvline(max_array[max_index])
+axes[0].axvline(wavelengthBound_low, ls = '-', color = 'black', linewidth = 3)
+axes[0].axvline(wavelengthBound_high, ls = '-', color = 'black', linewidth = 3)
+for idx, max_entry in enumerate(max_array): 
+    axes[0].axvline(df_spectra['Wavelength (nm)'][max_entry], linewidth = 2, color = colorList[(idx + len(max_array)) % len(max_array)], ls = '--')
 df_areas.plot.bar(ax = axes[1], rot = 0)
 plt.show()
