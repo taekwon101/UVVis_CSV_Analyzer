@@ -13,7 +13,7 @@ def WavelengthToIndex(wavelength: float)-> int:
     return index
 
 ## Create Dataframe of Raw Spectra from Given Directory ##
-specDir = r'Spectra\230112_operationMio\Operation MIO'
+specDir = r'Spectra\230203_Au-Ag_50-50_430nm_indAliquot'
 
 df_list = []
 first = True
@@ -33,9 +33,10 @@ df_spectra = pd.concat(df_list, axis=1)
 
 
 ## Baseline Correct, Normalize, Determine Max, and Integrate Spectra ##
-baselineIndex = WavelengthToIndex(200)
-# normalIndex = n/a
-wavelengthBound_low, wavelengthBound_high = 280, 300
+baselineIndex = WavelengthToIndex(700)
+normalIndex = WavelengthToIndex(283)
+wavelengthBound_low, wavelengthBound_high = 350, 500 #Ag plasmon
+# wavelengthBound_low, wavelengthBound_high = 480, 600 #Au plasmon
 absBoundIndex_low, absBoundIndex_high = WavelengthToIndex(wavelengthBound_low), WavelengthToIndex(wavelengthBound_high)
 first = True
 area_dict = {}
@@ -47,9 +48,9 @@ for column in df_spectra:
         df_spectra[column] -= baselineVal
 
         ## Normalization (if needed)
-        # normalVal = df[column][normalIndex]
-        # df[column] += 1e-10
-        # df[column] /= normalVal
+        normalVal = df_spectra[column][normalIndex]
+        df_spectra[column] += 1e-10
+        df_spectra[column] /= normalVal
 
         ## Maximum Absorbance
         max_array.append(df_spectra.loc[absBoundIndex_low:absBoundIndex_high, column].idxmax())
@@ -69,6 +70,7 @@ df_spectra.plot(ax = axes[0], x = 'Wavelength (nm)', use_index = True, title = t
 axes[0].axvline(wavelengthBound_low, ls = '-', color = 'black', linewidth = 3)
 axes[0].axvline(wavelengthBound_high, ls = '-', color = 'black', linewidth = 3)
 for idx, max_entry in enumerate(max_array): 
-    axes[0].axvline(df_spectra['Wavelength (nm)'][max_entry], linewidth = 2, color = colorList[(idx + len(max_array)) % len(max_array)], ls = '--')
+    colorIndex = (idx + len(colorList)) % len(colorList)
+    axes[0].axvline(df_spectra['Wavelength (nm)'][max_entry], linewidth = 2, color = colorList[colorIndex], ls = '--')
 df_areas.plot.bar(ax = axes[1], rot = 0)
 plt.show()
